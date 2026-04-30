@@ -131,16 +131,17 @@ class RouterMonitor:
             else:
                 metrics['external_ip'] = "Unknown"
             
-            # Статус VPN (OpenVPN)
-            stdin, stdout, stderr = client.exec_command("ps aux | grep 'openvpn.*amsterdam' | grep -v grep | wc -l")
-            vpn_running = int(stdout.read().decode('utf-8').strip())
-            metrics['vpn_status'] = 'active' if vpn_running > 0 else 'inactive'
+            # Статус VPN через uci
+            stdin, stdout, stderr = client.exec_command("uci get openvpn.amsterdam.enabled 2>/dev/null")
+            vpn_enabled = stdout.read().decode('utf-8').strip()
+            metrics['vpn_status'] = 'active' if vpn_enabled == '1' else 'inactive'
             
-            # Если VPN активен, получаем его IP
-            if vpn_running > 0:
-                stdin, stdout, stderr = client.exec_command("ip route | grep tun | awk '{print $3}' | head -1")
+            # Если VPN включен, получаем IP
+            if vpn_enabled == '1':
+                stdin, stdout, stderr = client.exec_command("ifconfig tun0 2>/dev/null | grep 'inet addr' | awk '{print $2}' | cut -d: -f2")
                 vpn_ip = stdout.read().decode('utf-8').strip()
-                metrics['vpn_ip'] = vpn_ip if vpn_ip else "Unknown"
+                if vpn_ip:
+                    metrics['vpn_ip'] = vpn_ip
             
             client.close()
             
@@ -158,7 +159,7 @@ class RouterMonitor:
             return self.last_metrics
     
     def toggle_vpn(self):
-        """Включение/выключение OpenVPN"""
+        """Включение/выключение OpenVPN через uci"""
         try:
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -169,23 +170,26 @@ class RouterMonitor:
                 timeout=5
             )
             
-            # Проверяем статус
-            stdin, stdout, stderr = client.exec_command("ps aux | grep 'openvpn.*amsterdam' | grep -v grep | wc -l")
-            is_running = int(stdout.read().decode('utf-8').strip()) > 0
+            # Проверяем текущий статус
+            stdin, stdout, stderr = client.exec_command("uci get openvpn.amsterdam.enabled 2>/dev/null")
+            current_status = stdout.read().decode('utf-8').strip()
+            is_enabled = current_status == '1'
             
-            if is_running:
-                # Останавливаем VPN
-                client.exec_command("killall openvpn 2>/dev/null")
+            if is_enabled:
+                # Отключаем VPN
+                logger.info("Disabling VPN...")
+                client.exec_command("uci set openvpn.amsterdam.enabled=0 && uci commit openvpn && /etc/init.d/openvpn stop && /etc/init.d/openvpn disable")
                 action = "stopped"
-                logger.info("VPN stopped")
+                logger.info("VPN disabled")
             else:
-                # Запускаем VPN с правильным конфигом
-                client.exec_command("cd /etc/openvpn && openvpn --config amsterdam.ovpn --auth-user-pass amsterdam.auth --daemon")
+                # Включаем VPN
+                logger.info("Enabling VPN...")
+                client.exec_command("uci set openvpn.amsterdam.enabled=1 && uci commit openvpn && /etc/init.d/openvpn enable && /etc/init.d/openvpn start")
                 action = "started"
-                logger.info("VPN started")
+                logger.info("VPN enabled")
             
             client.close()
-            time.sleep(1)  # Даем время на запуск/остановку
+            time.sleep(2)  # Даем время на применение настроек
             return {'status': 'success', 'action': action}
         except Exception as e:
             logger.error(f"VPN toggle error: {e}")
@@ -208,7 +212,6 @@ def toggle_vpn():
 
 @app.route('/api/vpn/status', methods=['GET'])
 def vpn_status():
-    """Отдельный эндпоинт для статуса VPN"""
     metrics = monitor.get_metrics()
     return jsonify({
         'status': metrics.get('vpn_status', 'inactive'),

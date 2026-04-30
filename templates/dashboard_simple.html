@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBERPUNK ROUTER // NETRUNNER DASH</title>
+    <title>ROUTER DASHBOARD // NETRUNNER</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         
@@ -15,7 +15,7 @@
         
         body {
             font-family: 'Orbitron', 'Courier New', monospace;
-            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+            background: radial-gradient(ellipse at center, #0a0a2a 0%, #000000 100%);
             min-height: 100vh;
             padding: 20px;
             color: #00ff9d;
@@ -23,7 +23,7 @@
             overflow-x: hidden;
         }
         
-        /* Киберимпланты - геометрические узоры */
+        /* Анимированный фон - движущиеся линии */
         body::before {
             content: "";
             position: fixed;
@@ -32,65 +32,81 @@
             width: 100%;
             height: 100%;
             background-image: 
-                repeating-linear-gradient(45deg, rgba(0,255,157,0.03) 0px, rgba(0,255,157,0.03) 2px, transparent 2px, transparent 8px),
-                repeating-linear-gradient(135deg, rgba(255,0,255,0.02) 0px, rgba(255,0,255,0.02) 1px, transparent 1px, transparent 6px);
+                repeating-linear-gradient(90deg, rgba(0,100,255,0.03) 0px, rgba(0,100,255,0.03) 1px, transparent 1px, transparent 50px),
+                repeating-linear-gradient(0deg, rgba(0,255,157,0.02) 0px, rgba(0,255,157,0.02) 1px, transparent 1px, transparent 50px);
             pointer-events: none;
             z-index: 0;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Плавающие частицы */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(0,100,255,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
         }
         
-        /* Neon тени */
+        /* Neon заголовок */
         h1 {
             color: #00ff9d;
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-size: 1.8em;
             font-weight: 900;
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             text-transform: uppercase;
-            text-shadow: 
-                0 0 10px #00ff9d,
-                0 0 20px #00ff9d,
-                0 0 40px rgba(0,255,157,0.5);
-            animation: neonPulse 2s infinite;
-        }
-        
-        @keyframes neonPulse {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px #00ff9d, 0 0 20px #00ff9d; }
-            50% { opacity: 0.9; text-shadow: 0 0 5px #00ff9d, 0 0 15px #00ff9d; }
+            text-shadow: 0 0 10px #00ff9d, 0 0 20px rgba(0,255,157,0.5);
         }
         
         .header-container {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         .subtitle {
-            font-size: 0.7em;
+            font-size: 0.6em;
             color: #ff00ff;
             text-shadow: 0 0 5px #ff00ff;
             letter-spacing: 2px;
+            margin-bottom: 15px;
         }
         
-        /* Статус бар - как интерфейс киберимпланта */
+        /* Статус бар */
         .status-bar {
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid #00ff9d;
-            box-shadow: 0 0 15px rgba(0,255,157,0.3);
-            padding: 15px 20px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0,255,157,0.3);
+            padding: 12px 20px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
+            font-size: 0.85em;
         }
         
         .status {
@@ -100,19 +116,23 @@
         }
         
         .status-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            animation: pulse 1s infinite;
             box-shadow: 0 0 10px currentColor;
         }
         
-        .status-dot.online { background: #00ff9d; color: #00ff9d; animation: none; }
+        .status-dot.online { 
+            background: #00ff9d;
+            box-shadow: 0 0 10px #00ff9d;
+            animation: none;
+        }
+        
         .status-dot.online::after {
             content: '';
             position: absolute;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #00ff9d;
             animation: ping 1.5s infinite;
@@ -125,82 +145,79 @@
         
         .status-dot.offline { background: #ff0066; box-shadow: 0 0 10px #ff0066; }
         
-        .status-dot.online { background: #00ff9d; box-shadow: 0 0 10px #00ff9d; }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
+        .router-name {
+            font-size: 0.8em;
+            opacity: 0.8;
+            letter-spacing: 1px;
         }
         
-        /* Карточки - как интерфейс нетраннера */
+        .current-time {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+        
+        /* Карточки компактные */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             margin-bottom: 20px;
         }
         
         .card {
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.6);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(0,255,157,0.3);
-            padding: 20px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 15px;
+            transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0,255,157,0.1), transparent);
-            transition: left 0.5s;
-        }
-        
-        .card:hover::before {
-            left: 100%;
         }
         
         .card:hover {
             border-color: #00ff9d;
-            box-shadow: 0 0 20px rgba(0,255,157,0.3);
-            transform: translateY(-3px);
+            box-shadow: 0 0 15px rgba(0,255,157,0.2);
         }
         
         .card h3 {
             color: #ff00ff;
-            margin-bottom: 15px;
-            font-size: 1.1em;
+            margin-bottom: 12px;
+            font-size: 0.85em;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            border-left: 3px solid #ff00ff;
-            padding-left: 12px;
-            text-shadow: 0 0 5px #ff00ff;
+            letter-spacing: 2px;
+            border-left: 2px solid #ff00ff;
+            padding-left: 10px;
         }
         
-        /* Цифры как в киберпанке */
+        /* Компактные данные */
         .load-values {
             display: flex;
             justify-content: space-around;
-            margin-top: 15px;
+            margin: 10px 0;
         }
         
-        .load-item { text-align: center; }
-        .load-label { font-size: 0.7em; color: #00ff9d; opacity: 0.7; letter-spacing: 2px; }
-        .load-number { 
-            font-size: 2em; 
-            font-weight: 900; 
-            color: #00ff9d; 
+        .load-item {
+            text-align: center;
+        }
+        
+        .load-label {
+            font-size: 0.6em;
+            color: #00ff9d;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+        
+        .load-number {
+            font-size: 1.5em;
+            font-weight: 900;
+            color: #00ff9d;
             text-shadow: 0 0 5px #00ff9d;
             font-family: monospace;
         }
         
         .progress-bar {
-            margin-top: 10px;
+            margin-top: 8px;
             background: rgba(0,255,157,0.1);
             border: 1px solid #00ff9d;
             overflow: hidden;
@@ -209,27 +226,65 @@
         .progress-fill {
             background: linear-gradient(90deg, #00ff9d, #ff00ff);
             width: 0%;
-            height: 20px;
+            height: 15px;
             transition: width 0.3s;
             box-shadow: 0 0 5px #00ff9d;
         }
         
-        /* Toggle switch для VPN (Cyberpunk style) */
+        /* Компактные строки данных */
+        .data-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 6px 0;
+            font-size: 0.8em;
+        }
+        
+        .data-label {
+            color: #00ff9d;
+            opacity: 0.7;
+            letter-spacing: 1px;
+        }
+        
+        .data-value {
+            color: #ff00ff;
+            font-weight: bold;
+            text-shadow: 0 0 3px #ff00ff;
+            font-family: monospace;
+        }
+        
+        /* VPN тумблер */
         .vpn-toggle {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 15px;
-            padding: 10px;
+            margin-top: 10px;
+            padding: 8px;
             background: rgba(0,255,157,0.05);
             border: 1px solid rgba(0,255,157,0.3);
+        }
+        
+        .vpn-status-text {
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .vpn-status-text.active {
+            color: #00ff9d;
+            text-shadow: 0 0 5px #00ff9d;
+        }
+        
+        .vpn-status-text.inactive {
+            color: #ff0066;
+            text-shadow: 0 0 5px #ff0066;
         }
         
         .switch {
             position: relative;
             display: inline-block;
-            width: 60px;
-            height: 34px;
+            width: 50px;
+            height: 26px;
         }
         
         .switch input {
@@ -253,10 +308,10 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 3px;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 2px;
             background-color: #ff0066;
             transition: 0.3s;
             box-shadow: 0 0 5px #ff0066;
@@ -268,7 +323,7 @@
         }
         
         input:checked + .slider:before {
-            transform: translateX(26px);
+            transform: translateX(22px);
             background-color: #00ff9d;
             box-shadow: 0 0 10px #00ff9d;
         }
@@ -281,67 +336,12 @@
             border-radius: 50%;
         }
         
-        .vpn-status-text {
-            font-size: 0.8em;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        
-        .vpn-status-text.active {
-            color: #00ff9d;
-            text-shadow: 0 0 5px #00ff9d;
-        }
-        
-        .vpn-status-text.inactive {
-            color: #ff0066;
-            text-shadow: 0 0 5px #ff0066;
-        }
-        
-        .data-line {
-            margin: 8px 0;
-            font-size: 0.85em;
-        }
-        
-        .data-label {
-            color: #00ff9d;
-            opacity: 0.7;
-            display: inline-block;
-            width: 140px;
-            letter-spacing: 1px;
-        }
-        
-        .data-value {
-            color: #ff00ff;
-            font-weight: bold;
-            text-shadow: 0 0 3px #ff00ff;
-        }
-        
         .timestamp {
-            text-align: center;
-            margin-top: 20px;
+            text-align: right;
+            margin-top: 15px;
             font-size: 0.7em;
-            opacity: 0.6;
+            opacity: 0.5;
             letter-spacing: 1px;
-        }
-        
-        .refresh-btn {
-            background: rgba(0,255,157,0.1);
-            color: #00ff9d;
-            border: 1px solid #00ff9d;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-family: 'Orbitron', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: all 0.3s;
-        }
-        
-        .refresh-btn:hover {
-            background: #00ff9d;
-            color: #000;
-            box-shadow: 0 0 15px #00ff9d;
         }
         
         .blink {
@@ -353,121 +353,88 @@
             50% { opacity: 0; }
         }
         
-        /* Глитч эффект */
-        @keyframes glitch {
-            0%, 100% { transform: translate(0); }
-            20% { transform: translate(-1px, 1px); }
-            40% { transform: translate(-1px, -1px); }
-            60% { transform: translate(1px, 1px); }
-            80% { transform: translate(1px, -1px); }
-        }
-        
-        .glitch-text {
-            animation: glitch 0.2s infinite;
-        }
-        
         @media (max-width: 768px) {
             .metrics-grid { grid-template-columns: 1fr; }
             .load-number { font-size: 1.2em; }
+        }
+        
+        /* Убираем стандартные стили */
+        .hide {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-container">
-            <h1 class="glitch-text">>&gt; NETRUNNER DASH &lt;</h1>
-            <div class="subtitle">[ CYBERPUNK ROUTER INTERFACE v2.0 ]</div>
+            <h1>&gt;&gt; NETRUNNER DASH &lt;&lt;</h1>
+            <div class="subtitle">[ CYBERPUNK INTERFACE v2.0 ]</div>
         </div>
         
         <div class="status-bar">
             <div class="status">
                 <div class="status-dot online" id="statusDot"></div>
-                <span id="statusText">CONNECTED</span>
+                <span id="statusText">ONLINE</span>
                 <span class="blink">_</span>
             </div>
-            <div>🎯 TARGET: SNR-CPE-ME2-Lite</div>
-            <div>⏱️ UPTIME: <span id="uptime">-</span></div>
+            <div class="router-name" id="routerName">SNR-CPE-ME2-Lite</div>
+            <div class="current-time" id="currentTime">--:--:--</div>
+            <div>UPTIME: <span id="uptime">-</span></div>
             <div>🌐 EXT IP: <span id="external_ip">-</span></div>
-            <button class="refresh-btn" onclick="loadMetrics()">⟳ REFRESH</button>
         </div>
         
         <div class="metrics-grid">
+            <!-- System Status - объединенный блок -->
             <div class="card">
-                <h3>CPU LOAD AVERAGE</h3>
+                <h3>SYSTEM STATUS</h3>
                 <div class="load-values">
                     <div class="load-item">
-                        <div class="load-label">1 MIN</div>
+                        <div class="load-label">1m</div>
                         <div class="load-number" id="load1">-</div>
                     </div>
                     <div class="load-item">
-                        <div class="load-label">5 MIN</div>
+                        <div class="load-label">5m</div>
                         <div class="load-number" id="load5">-</div>
                     </div>
                     <div class="load-item">
-                        <div class="load-label">15 MIN</div>
+                        <div class="load-label">15m</div>
                         <div class="load-number" id="load15">-</div>
                     </div>
                 </div>
-                <div class="data-line">
-                    <span class="data-label">CPU CORES:</span>
-                    <span class="data-value" id="cpu_cores">-</span>
+                <div class="data-row">
+                    <span class="data-label">ARP ENTRIES:</span>
+                    <span class="data-value" id="connections">-</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">STORAGE:</span>
+                    <span class="data-value" id="disk_info">-</span>
                 </div>
             </div>
             
+            <!-- Memory Usage - компактный -->
             <div class="card">
                 <h3>MEMORY USAGE</h3>
-                <div class="data-line">
-                    <span class="data-label">USED:</span>
-                    <span class="data-value" id="mem_used">-</span>
-                    <span> MB</span>
+                <div class="data-row">
+                    <span class="data-label">USED / FREE:</span>
+                    <span class="data-value"><span id="mem_used">-</span> / <span id="mem_free">-</span> MB</span>
                 </div>
-                <div class="data-line">
-                    <span class="data-label">TOTAL:</span>
-                    <span class="data-value" id="mem_total">-</span>
-                    <span> MB</span>
-                </div>
-                <div class="data-line">
-                    <span class="data-label">FREE:</span>
-                    <span class="data-value" id="mem_free">-</span>
-                    <span> MB</span>
-                </div>
-                <div class="data-line">
+                <div class="data-row">
                     <span class="data-label">USAGE:</span>
-                    <span class="data-value" id="mem_percent">-</span>
-                    <span>%</span>
+                    <span class="data-value"><span id="mem_percent">-</span>%</span>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="mem_bar"></div>
                 </div>
             </div>
             
-            <div class="card">
-                <h3>SYSTEM STATUS</h3>
-                <div class="data-line">
-                    <span class="data-label">ARP ENTRIES:</span>
-                    <span class="data-value" id="connections">-</span>
-                </div>
-                <div class="data-line">
-                    <span class="data-label">TEMP:</span>
-                    <span class="data-value" id="temperature">N/A</span>
-                </div>
-                <div class="data-line">
-                    <span class="data-label">STORAGE:</span>
-                    <span class="data-value" id="disk_info">-</span>
-                </div>
-            </div>
-            
+            <!-- VPN Control -->
             <div class="card">
                 <h3>VPN TUNNEL</h3>
-                <div class="data-line">
+                <div class="data-row">
                     <span class="data-label">SERVER:</span>
-                    <span class="data-value">amsterdam.amsterdam</span>
+                    <span class="data-value">amsterdam</span>
                 </div>
-                <div class="data-line">
-                    <span class="data-label">STATUS:</span>
-                    <span class="data-value" id="vpn_status_text">INACTIVE</span>
-                </div>
-                <div class="data-line" id="vpn_ip_line" style="display: none;">
+                <div class="data-row" id="vpn_ip_line" style="display: none;">
                     <span class="data-label">VPN IP:</span>
                     <span class="data-value" id="vpn_ip">-</span>
                 </div>
@@ -483,81 +450,99 @@
         
         <div class="timestamp">
             <span id="timestamp">INITIALIZING...</span>
-            <span class="blink">_</span>
         </div>
     </div>
     
     <script>
         let isToggling = false;
         
+        // Обновление текущего времени
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('ru-RU', { hour12: false });
+            document.getElementById('currentTime').innerHTML = timeStr;
+        }
+        
         async function loadMetrics() {
             try {
                 const response = await fetch('/api/metrics');
                 const data = await response.json();
                 
+                // Load Average
                 if (data.load_avg) {
                     document.getElementById('load1').innerText = data.load_avg.load1.toFixed(2);
                     document.getElementById('load5').innerText = data.load_avg.load5.toFixed(2);
                     document.getElementById('load15').innerText = data.load_avg.load15.toFixed(2);
                 }
                 
-                if (data.memory) {
-                    document.getElementById('mem_used').innerText = data.memory.used;
-                    document.getElementById('mem_total').innerText = data.memory.total;
-                    document.getElementById('mem_free').innerText = data.memory.free;
-                    document.getElementById('mem_percent').innerText = data.memory.percent;
-                    document.getElementById('mem_bar').style.width = data.memory.percent + '%';
+                // Memory - исправляем отображение
+                if (data.memory && data.memory.total > 0) {
+                    const used = data.memory.used;
+                    const free = data.memory.free;
+                    const percent = data.memory.percent;
+                    
+                    document.getElementById('mem_used').innerText = used;
+                    document.getElementById('mem_free').innerText = free;
+                    document.getElementById('mem_percent').innerText = percent;
+                    document.getElementById('mem_bar').style.width = percent + '%';
                     
                     const memBar = document.getElementById('mem_bar');
-                    if (data.memory.percent > 90) memBar.style.background = '#ff0066';
-                    else if (data.memory.percent > 75) memBar.style.background = '#ff00ff';
+                    if (percent > 90) memBar.style.background = '#ff0066';
+                    else if (percent > 75) memBar.style.background = '#ff00ff';
                     else memBar.style.background = 'linear-gradient(90deg, #00ff9d, #ff00ff)';
+                } else if (data.memory) {
+                    // Если данные некорректные, показываем заглушку
+                    document.getElementById('mem_used').innerText = 'N/A';
+                    document.getElementById('mem_free').innerText = 'N/A';
+                    document.getElementById('mem_percent').innerText = 'N/A';
                 }
                 
+                // Uptime
                 if (data.uptime) document.getElementById('uptime').innerText = data.uptime;
+                
+                // Connections
                 if (data.connections) document.getElementById('connections').innerText = data.connections;
-                if (data.temperature) document.getElementById('temperature').innerHTML = data.temperature;
+                
+                // External IP
                 if (data.external_ip) document.getElementById('external_ip').innerHTML = data.external_ip;
-                if (data.cpu_cores) document.getElementById('cpu_cores').innerText = data.cpu_cores;
+                
+                // Disk info
                 if (data.disk) document.getElementById('disk_info').innerHTML = `${data.disk.used} / ${data.disk.total} (${data.disk.percent})`;
-                if (data.timestamp) document.getElementById('timestamp').innerHTML = data.timestamp;
+                
+                // Last update timestamp
+                if (data.timestamp) document.getElementById('timestamp').innerHTML = `LAST SCAN: ${data.timestamp}`;
                 
                 // VPN статус
                 if (data.vpn_status) {
                     const toggle = document.getElementById('vpnToggle');
-                    const statusSpan = document.getElementById('vpn_status_text');
                     const statusLabel = document.getElementById('vpnStatusLabel');
                     const vpnIpLine = document.getElementById('vpn_ip_line');
                     const vpnIpSpan = document.getElementById('vpn_ip');
                     
                     if (data.vpn_status === 'active') {
                         toggle.checked = true;
-                        statusSpan.innerHTML = '🟢 ACTIVE';
-                        statusSpan.className = 'vpn-status-text active';
-                        statusLabel.innerHTML = 'ONLINE';
+                        statusLabel.innerHTML = '🟢 ACTIVE';
                         statusLabel.className = 'vpn-status-text active';
                         if (data.vpn_ip) {
                             vpnIpSpan.innerHTML = data.vpn_ip;
-                            vpnIpLine.style.display = 'block';
+                            vpnIpLine.style.display = 'flex';
                         }
                     } else {
                         toggle.checked = false;
-                        statusSpan.innerHTML = '🔴 INACTIVE';
-                        statusSpan.className = 'vpn-status-text inactive';
-                        statusLabel.innerHTML = 'OFFLINE';
+                        statusLabel.innerHTML = '🔴 INACTIVE';
                         statusLabel.className = 'vpn-status-text inactive';
                         vpnIpLine.style.display = 'none';
                     }
                 }
                 
                 document.getElementById('statusDot').className = 'status-dot online';
-                document.getElementById('statusText').innerText = 'CONNECTED';
+                document.getElementById('statusText').innerText = 'ONLINE';
                 
             } catch (error) {
                 console.error('Error loading metrics:', error);
-                document.getElementById('timestamp').innerHTML = '⚠️ CONNECTION LOST ⚠️';
+                document.getElementById('timestamp').innerHTML = '⚠️ CONNECTION ERROR ⚠️';
                 document.getElementById('statusDot').className = 'status-dot offline';
-                document.getElementById('statusText').innerText = 'DISCONNECTED';
+                document.getElementById('statusText').innerText = 'OFFLINE';
             }
         }
         
@@ -567,8 +552,6 @@
             
             const toggle = document.getElementById('vpnToggle');
             const originalState = toggle.checked;
-            
-            // Оптимистичное обновление UI
             toggle.disabled = true;
             
             try {
@@ -576,13 +559,11 @@
                 const result = await response.json();
                 
                 if (result.status === 'success') {
-                    // Ждем обновления статуса
                     setTimeout(() => {
                         loadMetrics();
                         setTimeout(loadMetrics, 1000);
                     }, 500);
                 } else {
-                    // Возвращаем состояние если ошибка
                     toggle.checked = originalState;
                     console.error('VPN toggle failed:', result.message);
                 }
@@ -595,10 +576,14 @@
             }
         }
         
-        // Навешиваем обработчик на тумблер
+        // Инициализация
         document.getElementById('vpnToggle').addEventListener('change', toggleVPN);
         
-        // Загружаем данные и обновляем каждую секунду
+        // Запускаем обновление времени
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        
+        // Загружаем метрики и обновляем каждую секунду
         loadMetrics();
         setInterval(loadMetrics, 1000);
     </script>
