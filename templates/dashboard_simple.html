@@ -3,33 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Router Dashboard</title>
+    <title>ROUTER DASHBOARD // MIL-SPEC</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 20px;
+            color: #00ff41;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }
         
         h1 {
-            color: white;
+            color: #00ff41;
             text-align: center;
             margin-bottom: 30px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-size: 2em;
+            font-weight: bold;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px #00ff41;
+            border-bottom: 2px solid #00ff41;
+            display: inline-block;
+            padding-bottom: 10px;
+            width: auto;
+        }
+        
+        .header-container {
+            text-align: center;
+            margin-bottom: 30px;
         }
         
         .status-bar {
-            background: rgba(255,255,255,0.95);
-            border-radius: 10px;
+            background: #0f0f0f;
+            border: 1px solid #00ff41;
+            border-radius: 0px;
             padding: 15px 20px;
             margin-bottom: 20px;
             display: flex;
@@ -37,6 +51,8 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
+            font-family: monospace;
+            box-shadow: 0 0 5px rgba(0,255,65,0.3);
         }
         
         .status {
@@ -46,13 +62,14 @@
         }
         
         .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 0px;
+            animation: pulse 1s infinite;
         }
         
-        .status-dot.online { background: #27ae60; animation: pulse 2s infinite; }
-        .status-dot.offline { background: #e74c3c; }
+        .status-dot.online { background: #00ff41; box-shadow: 0 0 5px #00ff41; }
+        .status-dot.offline { background: #ff0000; box-shadow: 0 0 5px #ff0000; }
         
         @keyframes pulse {
             0% { opacity: 1; }
@@ -68,25 +85,40 @@
         }
         
         .card {
-            background: white;
-            border-radius: 15px;
+            background: #0f0f0f;
+            border: 1px solid #00ff41;
+            border-radius: 0px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: ">";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: #00ff41;
+            font-size: 12px;
+            opacity: 0.5;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(0,255,65,0.2);
+            border-color: #00ff41;
         }
         
         .card h3 {
-            color: #667eea;
+            color: #00ff41;
             margin-bottom: 15px;
-            font-size: 1.3em;
-            border-left: 4px solid #667eea;
-            padding-left: 12px;
-        }
-        
-        .metric-value {
-            font-size: 2em;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             font-weight: bold;
-            color: #333;
-            margin: 10px 0;
+            border-left: 3px solid #00ff41;
+            padding-left: 12px;
         }
         
         .load-values {
@@ -96,18 +128,19 @@
         }
         
         .load-item { text-align: center; }
-        .load-label { font-size: 0.9em; color: #999; }
-        .load-number { font-size: 1.8em; font-weight: bold; color: #333; }
+        .load-label { font-size: 0.8em; color: #00ff41; opacity: 0.7; text-transform: uppercase; }
+        .load-number { font-size: 1.8em; font-weight: bold; color: #00ff41; font-family: monospace; }
         
         .progress-bar {
             margin-top: 10px;
-            background: #f0f0f0;
-            border-radius: 10px;
+            background: #1a1a1a;
+            border: 1px solid #00ff41;
+            border-radius: 0px;
             overflow: hidden;
         }
         
         .progress-fill {
-            background: #667eea;
+            background: #00ff41;
             width: 0%;
             height: 20px;
             transition: width 0.3s;
@@ -115,25 +148,83 @@
         
         .timestamp {
             text-align: center;
-            color: white;
+            color: #00ff41;
             margin-top: 20px;
+            font-size: 0.8em;
+            font-family: monospace;
+            opacity: 0.7;
+        }
+        
+        .refresh-btn, .vpn-btn {
+            background: transparent;
+            color: #00ff41;
+            border: 1px solid #00ff41;
+            padding: 8px 16px;
+            border-radius: 0px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-family: monospace;
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover, .vpn-btn:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+            box-shadow: 0 0 10px #00ff41;
+        }
+        
+        .vpn-btn.active {
+            background: #00ff41;
+            color: #0a0a0a;
+            box-shadow: 0 0 10px #00ff41;
+        }
+        
+        @keyframes scan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0,255,65,0.03) 50%);
+            background-size: 100% 4px;
+            animation: scan 8s linear infinite;
+            z-index: 9999;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .data-line {
+            font-family: monospace;
+            margin: 5px 0;
             font-size: 0.9em;
         }
         
-        .refresh-btn {
-            background: white;
-            color: #667eea;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: transform 0.2s;
+        .data-label {
+            color: #00ff41;
+            opacity: 0.7;
+            display: inline-block;
+            width: 140px;
         }
         
-        .refresh-btn:hover {
-            transform: scale(1.05);
+        .data-value {
+            color: #00ff41;
+            font-weight: bold;
         }
         
         @media (max-width: 768px) {
@@ -144,47 +235,70 @@
 </head>
 <body>
     <div class="container">
-        <h1>📡 SNR-CPE Router Dashboard</h1>
+        <div class="header-container">
+            <h1>ROUTER DASHBOARD // v2.0</h1>
+            <div style="font-size: 0.7em; margin-top: 10px;">[ SYSTEM MONITORING TERMINAL ]</div>
+        </div>
         
         <div class="status-bar">
             <div class="status">
                 <div class="status-dot online" id="statusDot"></div>
-                <span id="statusText">Connected</span>
+                <span id="statusText">ONLINE</span>
+                <span class="blink">_</span>
             </div>
-            <div>🏠 Router: SNR-CPE-ME2-Lite</div>
-            <div>🕒 <span id="uptime">-</span></div>
-            <button class="refresh-btn" onclick="loadMetrics()">🔄 Refresh</button>
+            <div>🏭 TARGET: SNR-CPE-ME2-Lite</div>
+            <div>⏱️ UPTIME: <span id="uptime">-</span></div>
+            <div>🌐 EXTERNAL IP: <span id="external_ip">-</span></div>
+            <button class="refresh-btn" onclick="loadMetrics()">[ REFRESH ]</button>
         </div>
         
         <div class="metrics-grid">
             <!-- CPU Load Average -->
             <div class="card">
-                <h3>⚡ CPU Load Average</h3>
+                <h3>CPU LOAD AVERAGE</h3>
                 <div class="load-values">
                     <div class="load-item">
-                        <div class="load-label">1 min</div>
+                        <div class="load-label">1 MIN</div>
                         <div class="load-number" id="load1">-</div>
                     </div>
                     <div class="load-item">
-                        <div class="load-label">5 min</div>
+                        <div class="load-label">5 MIN</div>
                         <div class="load-number" id="load5">-</div>
                     </div>
                     <div class="load-item">
-                        <div class="load-label">15 min</div>
+                        <div class="load-label">15 MIN</div>
                         <div class="load-number" id="load15">-</div>
                     </div>
                 </div>
-                <div style="margin-top: 10px; text-align: center;">💻 Cores: <span id="cpu_cores">-</span></div>
+                <div class="data-line">
+                    <span class="data-label">CPU CORES:</span>
+                    <span class="data-value" id="cpu_cores">-</span>
+                </div>
             </div>
             
             <!-- Memory Usage -->
             <div class="card">
-                <h3>💾 Memory Usage</h3>
-                <div class="metric-value">
-                    <span id="mem_used">-</span> MB / <span id="mem_total">-</span> MB
+                <h3>MEMORY USAGE</h3>
+                <div class="data-line">
+                    <span class="data-label">USED:</span>
+                    <span class="data-value" id="mem_used">-</span>
+                    <span> MB</span>
                 </div>
-                <div>📊 Used: <span id="mem_percent">-</span>%</div>
-                <div>🆓 Free: <span id="mem_free">-</span> MB</div>
+                <div class="data-line">
+                    <span class="data-label">TOTAL:</span>
+                    <span class="data-value" id="mem_total">-</span>
+                    <span> MB</span>
+                </div>
+                <div class="data-line">
+                    <span class="data-label">FREE:</span>
+                    <span class="data-value" id="mem_free">-</span>
+                    <span> MB</span>
+                </div>
+                <div class="data-line">
+                    <span class="data-label">USAGE:</span>
+                    <span class="data-value" id="mem_percent">-</span>
+                    <span>%</span>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="mem_bar"></div>
                 </div>
@@ -192,33 +306,59 @@
             
             <!-- System Status -->
             <div class="card">
-                <h3>🖥️ System Status</h3>
-                <div>🔌 Active Connections: <span id="connections">-</span></div>
-                <div>🌡️ Temperature: <span id="temperature">N/A</span></div>
-                <div>💾 Storage: <span id="disk_info">-</span></div>
+                <h3>SYSTEM STATUS</h3>
+                <div class="data-line">
+                    <span class="data-label">CONNECTIONS (ARP):</span>
+                    <span class="data-value" id="connections">-</span>
+                </div>
+                <div class="data-line">
+                    <span class="data-label">WIFI CLIENTS:</span>
+                    <span class="data-value" id="wifi_clients">-</span>
+                </div>
+                <div class="data-line">
+                    <span class="data-label">TEMP:</span>
+                    <span class="data-value" id="temperature">N/A</span>
+                </div>
+                <div class="data-line">
+                    <span class="data-label">STORAGE:</span>
+                    <span class="data-value" id="disk_info">-</span>
+                </div>
+            </div>
+            
+            <!-- VPN Control -->
+            <div class="card">
+                <h3>VPN CONTROL</h3>
+                <div class="data-line">
+                    <span class="data-label">STATUS:</span>
+                    <span class="data-value" id="vpn_status">-</span>
+                </div>
+                <div class="data-line">
+                    <button class="vpn-btn" id="vpnBtn" onclick="toggleVPN()">[ TOGGLE VPN ]</button>
+                </div>
+                <div class="data-line" style="margin-top: 10px; font-size: 0.7em; opacity: 0.5;">
+                    ⚡ OpenVPN amsterdam.amsterdam
+                </div>
             </div>
         </div>
         
         <div class="timestamp">
-            📡 Last Update: <span id="timestamp">Loading...</span>
+            <span id="timestamp">INITIALIZING...</span>
+            <span class="blink">_</span>
         </div>
     </div>
     
     <script>
-        // Функция загрузки метрик
         async function loadMetrics() {
             try {
                 const response = await fetch('/api/metrics');
                 const data = await response.json();
                 
-                // Load Average
                 if (data.load_avg) {
                     document.getElementById('load1').innerText = data.load_avg.load1.toFixed(2);
                     document.getElementById('load5').innerText = data.load_avg.load5.toFixed(2);
                     document.getElementById('load15').innerText = data.load_avg.load15.toFixed(2);
                 }
                 
-                // Memory
                 if (data.memory) {
                     document.getElementById('mem_used').innerText = data.memory.used;
                     document.getElementById('mem_total').innerText = data.memory.total;
@@ -227,57 +367,68 @@
                     document.getElementById('mem_bar').style.width = data.memory.percent + '%';
                     
                     const memBar = document.getElementById('mem_bar');
-                    if (data.memory.percent > 90) memBar.style.background = '#e74c3c';
-                    else if (data.memory.percent > 75) memBar.style.background = '#f39c12';
-                    else memBar.style.background = '#27ae60';
+                    if (data.memory.percent > 90) memBar.style.background = '#ff0000';
+                    else if (data.memory.percent > 75) memBar.style.background = '#ff6600';
+                    else memBar.style.background = '#00ff41';
                 }
                 
-                // Uptime
-                if (data.uptime) {
-                    document.getElementById('uptime').innerText = data.uptime;
-                }
+                if (data.uptime) document.getElementById('uptime').innerText = data.uptime;
+                if (data.connections) document.getElementById('connections').innerText = data.connections;
+                if (data.wifi_clients) document.getElementById('wifi_clients').innerText = data.wifi_clients;
+                if (data.temperature) document.getElementById('temperature').innerHTML = data.temperature;
+                if (data.external_ip) document.getElementById('external_ip').innerHTML = data.external_ip;
+                if (data.cpu_cores) document.getElementById('cpu_cores').innerText = data.cpu_cores;
+                if (data.disk) document.getElementById('disk_info').innerHTML = `${data.disk.used} / ${data.disk.total} (${data.disk.percent})`;
+                if (data.timestamp) document.getElementById('timestamp').innerHTML = data.timestamp;
                 
-                // Connections
-                if (data.connections) {
-                    document.getElementById('connections').innerText = data.connections;
-                }
-                
-                // Temperature
-                if (data.temperature) {
-                    document.getElementById('temperature').innerHTML = data.temperature;
-                }
-                
-                // Disk info
-                if (data.disk) {
-                    document.getElementById('disk_info').innerHTML = `${data.disk.used} / ${data.disk.total} (${data.disk.percent})`;
-                }
-                
-                // CPU Cores
-                if (data.cpu_cores) {
-                    document.getElementById('cpu_cores').innerText = data.cpu_cores;
-                }
-                
-                // Timestamp
-                if (data.timestamp) {
-                    document.getElementById('timestamp').innerHTML = data.timestamp;
+                // VPN статус
+                if (data.vpn_status) {
+                    const vpnStatus = document.getElementById('vpn_status');
+                    const vpnBtn = document.getElementById('vpnBtn');
+                    if (data.vpn_status === 'active') {
+                        vpnStatus.innerHTML = '🟢 ACTIVE';
+                        vpnBtn.classList.add('active');
+                    } else {
+                        vpnStatus.innerHTML = '🔴 INACTIVE';
+                        vpnBtn.classList.remove('active');
+                    }
                 }
                 
                 document.getElementById('statusDot').className = 'status-dot online';
-                document.getElementById('statusText').innerText = 'Connected';
+                document.getElementById('statusText').innerText = 'ONLINE';
                 
             } catch (error) {
                 console.error('Error loading metrics:', error);
-                document.getElementById('timestamp').innerHTML = 'Error loading data';
+                document.getElementById('timestamp').innerHTML = 'ERROR: CONNECTION LOST';
                 document.getElementById('statusDot').className = 'status-dot offline';
-                document.getElementById('statusText').innerText = 'Error';
+                document.getElementById('statusText').innerText = 'OFFLINE';
             }
         }
         
-        // Загружаем сразу при открытии
-        loadMetrics();
+        async function toggleVPN() {
+            const btn = document.getElementById('vpnBtn');
+            btn.disabled = true;
+            btn.innerText = '[ PROCESSING... ]';
+            
+            try {
+                const response = await fetch('/api/toggle_vpn', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    setTimeout(loadMetrics, 500);
+                } else {
+                    console.error('VPN toggle failed:', result.message);
+                }
+            } catch (error) {
+                console.error('Error toggling VPN:', error);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '[ TOGGLE VPN ]';
+            }
+        }
         
-        // Автообновление каждые 3 секунды
-        setInterval(loadMetrics, 3000);
+        loadMetrics();
+        setInterval(loadMetrics, 1000);
     </script>
 </body>
 </html>

@@ -3,15 +3,17 @@ import os
 import time
 import paramiko
 import logging
+import re
 from datetime import datetime
 from flask import Flask, render_template, jsonify
+from functools import lru_cache
+from threading import Lock
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Только переменные окружения, никаких .env файлов
 ROUTER_CONFIG = {
     'host': os.environ.get('ROUTER_HOST'),
     'user': os.environ.get('ROUTER_USER'),
@@ -19,7 +21,6 @@ ROUTER_CONFIG = {
 }
 
 def validate_config():
-    """Проверка что все переменные заданы"""
     missing = []
     if not ROUTER_CONFIG['host']:
         missing.append('ROUTER_HOST')
@@ -37,10 +38,19 @@ class RouterMonitor:
     def __init__(self):
         self.last_metrics = {}
         self.config_valid = validate_config()
+        self.last_update = 0
+        self.cache_ttl = 1
+        self.cache_lock = Lock()
+        
         if not self.config_valid:
-            logger.error("Router not configured! Set ROUTER_HOST, ROUTER_USER, ROUTER_PASSWORD")
+            logger.error("Router not configured!")
     
     def get_metrics(self):
+        with self.cache_lock:
+            now = time.time()
+            if now - self.last_update < self.cache_ttl and self.last_metrics:
+                return self.last_metrics
+        
         if not self.config_valid:
             return {'error': 'Configuration missing'}
         
@@ -51,7 +61,7 @@ class RouterMonitor:
                 ROUTER_CONFIG['host'],
                 username=ROUTER_CONFIG['user'],
                 password=ROUTER_CONFIG['password'],
-                timeout=10
+                timeout=5
             )
             
             metrics = {'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -98,28 +108,97 @@ class RouterMonitor:
             stdin, stdout, stderr = client.exec_command("uptime | awk -F 'up ' '{print $2}' | awk -F ',' '{print $1}'")
             metrics['uptime'] = stdout.read().decode('utf-8').strip()
             
-            # Connections
-            stdin, stdout, stderr = client.exec_command("netstat -an 2>/dev/null | grep -c ESTABLISHED")
+            # Активные подключения (правильные!)
+            stdin, stdout, stderr = client.exec_command("cat /proc/net/arp | grep -v 'IP address' | wc -l")
             metrics['connections'] = stdout.read().decode('utf-8').strip() or "0"
             
             # CPU cores
             stdin, stdout, stderr = client.exec_command("nproc 2>/dev/null || grep -c processor /proc/cpuinfo")
             metrics['cpu_cores'] = stdout.read().decode('utf-8').strip() or "1"
             
-            # Temperature
-            stdin, stdout, stderr = client.exec_command("cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null || echo 'N/A'")
-            temp = stdout.read().decode('utf-8').strip()
-            metrics['temperature'] = f"{int(temp)//1000}°C" if temp.isdigit() else 'N/A'
+            # Temperature (пробуем разные датчики)
+            temp_cmds = [
+                "cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null",
+                "sensors 2>/dev/null | grep 'Core 0' | awk '{print $3}' | cut -c2-3",
+                "cat /proc/stat | head -1"  # fallback
+            ]
+            temp = "N/A"
+            for cmd in temp_cmds:
+                stdin, stdout, stderr = client.exec_command(cmd)
+                temp_raw = stdout.read().decode('utf-8').strip()
+                if temp_raw and temp_raw.isdigit():
+                    temp = f"{int(temp_raw)//1000}°C"
+                    break
+                elif "°C" in temp_raw:
+                    temp = temp_raw
+                    break
+            metrics['temperature'] = temp
+            
+            # Внешний IP
+            stdin, stdout, stderr = client.exec_command("curl -s ifconfig.me 2>/dev/null || wget -qO- ifconfig.me 2>/dev/null")
+            external_ip = stdout.read().decode('utf-8').strip()
+            if external_ip and re.match(r'^\d+\.\d+\.\d+\.\d+$', external_ip):
+                metrics['external_ip'] = external_ip
+            else:
+                stdin, stdout, stderr = client.exec_command("ip route get 1 | awk '{print $NF;exit}'")
+                external_ip = stdout.read().decode('utf-8').strip()
+                metrics['external_ip'] = external_ip if external_ip else "Unknown"
+            
+            # Статус VPN (OpenVPN)
+            stdin, stdout, stderr = client.exec_command("ps aux | grep openvpn | grep -v grep | wc -l")
+            vpn_running = int(stdout.read().decode('utf-8').strip())
+            metrics['vpn_status'] = 'active' if vpn_running > 0 else 'inactive'
+            
+            # Количество WiFi клиентов
+            stdin, stdout, stderr = client.exec_command("iw dev wlan0 station dump 2>/dev/null | grep Station | wc -l || echo 0")
+            wifi_clients = stdout.read().decode('utf-8').strip()
+            metrics['wifi_clients'] = wifi_clients if wifi_clients else "0"
             
             client.close()
-            self.last_metrics = metrics
+            
+            with self.cache_lock:
+                self.last_metrics = metrics
+                self.last_update = time.time()
+            
             logger.info("Metrics updated")
             return metrics
             
         except Exception as e:
             logger.error(f"Error: {e}")
-            self.last_metrics['error'] = str(e)
+            with self.cache_lock:
+                self.last_metrics['error'] = str(e)
             return self.last_metrics
+    
+    def toggle_vpn(self):
+        """Включение/выключение OpenVPN"""
+        try:
+            client = paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(
+                ROUTER_CONFIG['host'],
+                username=ROUTER_CONFIG['user'],
+                password=ROUTER_CONFIG['password'],
+                timeout=5
+            )
+            
+            # Проверяем статус
+            stdin, stdout, stderr = client.exec_command("ps aux | grep openvpn | grep -v grep | wc -l")
+            is_running = int(stdout.read().decode('utf-8').strip()) > 0
+            
+            if is_running:
+                # Останавливаем VPN
+                client.exec_command("killall openvpn 2>/dev/null")
+                action = "stopped"
+            else:
+                # Запускаем VPN (путь к конфигу нужно уточнить)
+                client.exec_command("openvpn --config /etc/openvpn/amsterdam.ovpn --daemon 2>/dev/null")
+                action = "started"
+            
+            client.close()
+            return {'status': 'success', 'action': action}
+        except Exception as e:
+            logger.error(f"VPN toggle error: {e}")
+            return {'status': 'error', 'message': str(e)}
 
 monitor = RouterMonitor()
 
@@ -131,6 +210,11 @@ def index():
 def api_metrics():
     return jsonify(monitor.get_metrics())
 
+@app.route('/api/toggle_vpn', methods=['POST'])
+def toggle_vpn():
+    result = monitor.toggle_vpn()
+    return jsonify(result)
+
 @app.route('/api/health')
 def health():
     return jsonify({
@@ -139,9 +223,10 @@ def health():
     })
 
 if __name__ == '__main__':
-    logger.info("Starting Router Dashboard...")
+    logger.info("Starting Router Dashboard (Brutal Edition)...")
     if validate_config():
         logger.info(f"Router configured: {ROUTER_CONFIG['host']} as {ROUTER_CONFIG['user']}")
+        logger.info("Update interval: 1 second")
     else:
-        logger.warning("Missing configuration! Set required environment variables.")
+        logger.warning("Missing configuration!")
     app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
