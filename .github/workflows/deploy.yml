@@ -1,0 +1,45 @@
+name: Deploy Router Dashboard
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: |
+        docker build -t router-dashboard:${{ github.sha }} .
+        docker tag router-dashboard:${{ github.sha }} router-dashboard:latest
+    
+    - name: Stop and remove old container
+      run: |
+        docker stop router-dashboard 2>/dev/null || true
+        docker rm router-dashboard 2>/dev/null || true
+    
+    - name: Run new container
+      run: |
+        docker run -d \
+          --name router-dashboard \
+          --restart unless-stopped \
+          -p 8080:5000 \
+          -e ROUTER_HOST=${{ secrets.ROUTER_HOST }} \
+          -e ROUTER_USER=${{ secrets.ROUTER_USER }} \
+          -e ROUTER_PASSWORD=${{ secrets.ROUTER_PASSWORD }} \
+          router-dashboard:latest
+    
+    - name: Check container status
+      run: |
+        sleep 5
+        docker ps | grep router-dashboard
+        curl -f http://localhost:8080/api/health || exit 1
+    
+    - name: Clean up old images
+      run: |
+        docker image prune -f

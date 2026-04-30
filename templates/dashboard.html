@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Router Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .status-bar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.online { background: #27ae60; }
+        .status-dot.offline { background: #e74c3c; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover { transform: translateY(-5px); }
+        
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-left: 4px solid #667eea;
+            padding-left: 12px;
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            margin: 10px 0;
+        }
+        
+        .load-values {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        
+        .load-item { text-align: center; }
+        .load-label { font-size: 0.9em; color: #999; }
+        .load-number { font-size: 1.8em; font-weight: bold; color: #333; }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .timestamp {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .metrics-grid { grid-template-columns: 1fr; }
+            .load-number { font-size: 1.2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 SNR-CPE Router Dashboard</h1>
+        
+        <div class="status-bar">
+            <div class="status">
+                <div class="status-dot online" id="statusDot"></div>
+                <span id="statusText">Connected</span>
+            </div>
+            <div>🏠 Router: SNR-CPE-ME2-Lite</div>
+            <div>🕒 <span id="uptime">-</span></div>
+        </div>
+        
+        <div class="metrics-grid">
+            <!-- CPU Load Average -->
+            <div class="card">
+                <h3>⚡ CPU Load Average</h3>
+                <div class="load-values">
+                    <div class="load-item">
+                        <div class="load-label">1 min</div>
+                        <div class="load-number" id="load1">-</div>
+                    </div>
+                    <div class="load-item">
+                        <div class="load-label">5 min</div>
+                        <div class="load-number" id="load5">-</div>
+                    </div>
+                    <div class="load-item">
+                        <div class="load-label">15 min</div>
+                        <div class="load-number" id="load15">-</div>
+                    </div>
+                </div>
+                <div style="margin-top: 10px; text-align: center;">💻 Cores: <span id="cpu_cores">1</span></div>
+            </div>
+            
+            <!-- Memory Usage -->
+            <div class="card">
+                <h3>💾 Memory Usage</h3>
+                <div class="metric-value">
+                    <span id="mem_used">-</span> MB / <span id="mem_total">-</span> MB
+                </div>
+                <div>📊 Used: <span id="mem_percent">-</span>%</div>
+                <div>🆓 Free: <span id="mem_free">-</span> MB</div>
+                <div class="progress-bar" style="margin-top: 10px;">
+                    <div style="background:#f0f0f0; border-radius:10px; overflow:hidden;">
+                        <div id="mem_bar" style="background:#667eea; width:0%; height:20px; transition:width 0.3s;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Status -->
+            <div class="card">
+                <h3>🖥️ System Status</h3>
+                <div>🔌 Active Connections: <span id="connections">-</span></div>
+                <div>🌡️ Temperature: <span id="temperature">N/A</span></div>
+                <div>💾 Storage: <span id="disk_info">-</span></div>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <h3 style="margin-bottom: 15px;">📈 Load Average History (last 60 updates)</h3>
+            <canvas id="loadChart" height="300"></canvas>
+        </div>
+        
+        <div class="timestamp">
+            📡 Last Update: <span id="timestamp">Waiting for data...</span>
+        </div>
+    </div>
+    
+    <script>
+        // Подключаемся к WebSocket
+        const socket = io();
+        
+        // Данные для графиков
+        let loadData1 = [];
+        let loadData5 = [];
+        let loadData15 = [];
+        let timeLabels = [];
+        
+        // Инициализация графика
+        const ctx = document.getElementById('loadChart').getContext('2d');
+        const loadChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    { label: 'Load 1 min', data: [], borderColor: 'rgb(255, 99, 132)', backgroundColor: 'rgba(255, 99, 132, 0.1)', tension: 0.3, fill: true },
+                    { label: 'Load 5 min', data: [], borderColor: 'rgb(54, 162, 235)', backgroundColor: 'rgba(54, 162, 235, 0.1)', tension: 0.3, fill: true },
+                    { label: 'Load 15 min', data: [], borderColor: 'rgb(75, 192, 192)', backgroundColor: 'rgba(75, 192, 192, 0.1)', tension: 0.3, fill: true }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        title: { display: true, text: 'Load Average', font: { size: 12 } },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
+                    },
+                    x: { 
+                        title: { display: true, text: 'Time', font: { size: 12 } },
+                        ticks: { maxRotation: 45, autoSkip: true, maxTicksLimit: 10 }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                }
+            }
+        });
+        
+        // Функция обновления UI
+        function updateUI(data) {
+            // Load Average
+            if (data.load_avg) {
+                document.getElementById('load1').innerText = data.load_avg.load1.toFixed(2);
+                document.getElementById('load5').innerText = data.load_avg.load5.toFixed(2);
+                document.getElementById('load15').innerText = data.load_avg.load15.toFixed(2);
+            }
+            
+            // Memory
+            if (data.memory) {
+                document.getElementById('mem_used').innerText = data.memory.used;
+                document.getElementById('mem_total').innerText = data.memory.total;
+                document.getElementById('mem_free').innerText = data.memory.free;
+                document.getElementById('mem_percent').innerText = data.memory.percent;
+                document.getElementById('mem_bar').style.width = data.memory.percent + '%';
+                
+                // Цветовая индикация
+                const memBar = document.getElementById('mem_bar');
+                if (data.memory.percent > 90) memBar.style.background = '#e74c3c';
+                else if (data.memory.percent > 75) memBar.style.background = '#f39c12';
+                else memBar.style.background = '#27ae60';
+            }
+            
+            // Uptime
+            if (data.uptime) {
+                document.getElementById('uptime').innerText = data.uptime;
+            }
+            
+            // Connections
+            if (data.connections) {
+                document.getElementById('connections').innerText = data.connections;
+            }
+            
+            // Temperature
+            if (data.temperature) {
+                document.getElementById('temperature').innerHTML = data.temperature;
+            }
+            
+            // Disk info
+            if (data.disk) {
+                document.getElementById('disk_info').innerHTML = `${data.disk.used} / ${data.disk.total} (${data.disk.percent})`;
+            }
+            
+            // CPU Cores
+            if (data.cpu_cores) {
+                document.getElementById('cpu_cores').innerText = data.cpu_cores;
+            }
+            
+            // Timestamp
+            if (data.timestamp) {
+                document.getElementById('timestamp').innerHTML = data.timestamp;
+            }
+            
+            // Обновляем график
+            if (data.load_avg && data.load_avg.load1) {
+                const now = new Date().toLocaleTimeString();
+                timeLabels.push(now);
+                loadData1.push(data.load_avg.load1);
+                loadData5.push(data.load_avg.load5);
+                loadData15.push(data.load_avg.load15);
+                
+                if (loadData1.length > 60) {
+                    loadData1.shift();
+                    loadData5.shift();
+                    loadData15.shift();
+                    timeLabels.shift();
+                }
+                
+                loadChart.data.labels = timeLabels;
+                loadChart.data.datasets[0].data = loadData1;
+                loadChart.data.datasets[1].data = loadData5;
+                loadChart.data.datasets[2].data = loadData15;
+                loadChart.update('quiet');
+            }
+        }
+        
+        // WebSocket события
+        socket.on('connect', () => {
+            console.log('WebSocket connected');
+            document.getElementById('statusDot').className = 'status-dot online';
+            document.getElementById('statusText').innerText = 'Connected';
+        });
+        
+        socket.on('disconnect', () => {
+            console.log('WebSocket disconnected');
+            document.getElementById('statusDot').className = 'status-dot offline';
+            document.getElementById('statusText').innerText = 'Disconnected';
+        });
+        
+        socket.on('metrics_update', (data) => {
+            console.log('Metrics received:', data);
+            updateUI(data);
+        });
+        
+        // Загружаем начальные данные через REST API
+        fetch('/api/metrics')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Initial data:', data);
+                updateUI(data);
+            })
+            .catch(error => {
+                console.error('Error fetching metrics:', error);
+                document.getElementById('timestamp').innerHTML = 'Error loading data';
+            });
+    </script>
+</body>
+</html>
