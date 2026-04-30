@@ -16,7 +16,7 @@ python app.py
 
 # Docker
 docker build -t router-dashboard .
-docker run -d -p 8080:5000 \
+docker run -d -p 80:5000 \
   -e ROUTER_HOST="10.0.0.1" \
   -e ROUTER_USER="Admin" \
   -e ROUTER_PASSWORD="your_pass" \
@@ -35,7 +35,7 @@ docker run -d -p 8080:5000 \
 1. При push в main автоматический деплой
 
 ## Доступ
-* Веб: http://localhost:8080
+* Веб: http://localhost:80
 
 * API: /api/metrics, /api/health, /api/toggle_vpn
 

@@ -28,7 +28,7 @@ jobs:
         docker run -d \
           --name router-dashboard \
           --restart unless-stopped \
-          -p 8080:5000 \
+          -p 80:5000 \
           -e ROUTER_HOST=${{ secrets.ROUTER_HOST }} \
           -e ROUTER_USER=${{ secrets.ROUTER_USER }} \
           -e ROUTER_PASSWORD=${{ secrets.ROUTER_PASSWORD }} \
@@ -38,8 +38,11 @@ jobs:
       run: |
         sleep 5
         docker ps | grep router-dashboard
-        curl -f http://localhost:8080/api/health || exit 1
+        curl -f http://localhost:80/api/health || exit 1
     
-    - name: Clean up old images
+    - name: Clean up old images (keep only current)
       run: |
-        docker image prune -f
+        # Удаляем все старые образы router-dashboard, кроме latest
+        docker images router-dashboard --format "{{.ID}}" | grep -v $(docker images router-dashboard:latest --quiet) | xargs -r docker rmi -f
+        # Полная очистка системы - удаляем всё неиспользуемое
+        docker system prune -a -f --volumes
