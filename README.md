@@ -1,31 +1,47 @@
 # Router Dashboard
 
-Dashboard для мониторинга роутера SNR-CPE-ME2-Lite через SSH.
+Мониторинг роутера SNR-CPE-ME2-Lite через SSH с веб-интерфейсом в стиле Cyberpunk.
 
 ## Быстрый старт
 
-### Локальный запуск
 ```bash
+# Клонирование
+git clone https://github.com/denis56991/router-dashboard
+cd router-dashboard
+
+# Локальный запуск
 pip install -r requirements.txt
-export ROUTER_PASSWORD="your_password"
-python app.py# Router Dashboard
+export ROUTER_HOST="10.0.0.1" ROUTER_USER="Admin" ROUTER_PASSWORD="your_pass"
+python app.py
 
-Dashboard для мониторинга роутера SNR-CPE-ME2-Lite через SSH.
+# Docker
+docker build -t router-dashboard .
+docker run -d -p 8080:5000 \
+  -e ROUTER_HOST="10.0.0.1" \
+  -e ROUTER_USER="Admin" \
+  -e ROUTER_PASSWORD="your_pass" \
+  router-dashboard
+```
 
-## Возможности
+## GitHub Actions
+1. Добавьте секреты: 
 
-- 📊 Мониторинг CPU Load Average (1, 5, 15 минут)
-- 💾 Отслеживание использования памяти
-- 🔌 Статистика активных соединений
-- 🌡️ Температура устройства
-- 💽 Использование дискового пространства
-- 🕒 Uptime системы
-- 🔄 Автообновление данных в реальном времени
+        ROUTER_HOST
+        ROUTER_USER
+        ROUTER_PASSWORD
 
-## Быстрый старт
+1. Настройте self-hosted runner
 
-### Предварительные требования
+1. При push в main автоматический деплой
 
-- Python 3.11+
-- Docker (опционально)
-- SSH доступ к роутеру
+## Доступ
+* Веб: http://localhost:8080
+
+* API: /api/metrics, /api/health, /api/toggle_vpn
+
+## Управление VPN
+Тумблер в интерфейсе включает/выключает OpenVPN (конфиг `/etc/openvpn/amsterdam.ovpn` в будущем отдельная переменная)
+
+
+MIT License
+
