@@ -5,8 +5,7 @@ import paramiko
 import logging
 import re
 from datetime import datetime
-from flask import Flask, render_template, jsonify
-from functools import lru_cache
+from flask import Flask, render_template, jsonify, request
 from threading import Lock
 
 logging.basicConfig(level=logging.INFO)
@@ -108,7 +107,7 @@ class RouterMonitor:
             stdin, stdout, stderr = client.exec_command("uptime | awk -F 'up ' '{print $2}' | awk -F ',' '{print $1}'")
             metrics['uptime'] = stdout.read().decode('utf-8').strip()
             
-            # Активные подключения (правильные!)
+            # Активные подключения
             stdin, stdout, stderr = client.exec_command("cat /proc/net/arp | grep -v 'IP address' | wc -l")
             metrics['connections'] = stdout.read().decode('utf-8').strip() or "0"
             
@@ -116,43 +115,32 @@ class RouterMonitor:
             stdin, stdout, stderr = client.exec_command("nproc 2>/dev/null || grep -c processor /proc/cpuinfo")
             metrics['cpu_cores'] = stdout.read().decode('utf-8').strip() or "1"
             
-            # Temperature (пробуем разные датчики)
-            temp_cmds = [
-                "cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null",
-                "sensors 2>/dev/null | grep 'Core 0' | awk '{print $3}' | cut -c2-3",
-                "cat /proc/stat | head -1"  # fallback
-            ]
+            # Temperature
             temp = "N/A"
-            for cmd in temp_cmds:
-                stdin, stdout, stderr = client.exec_command(cmd)
-                temp_raw = stdout.read().decode('utf-8').strip()
-                if temp_raw and temp_raw.isdigit():
-                    temp = f"{int(temp_raw)//1000}°C"
-                    break
-                elif "°C" in temp_raw:
-                    temp = temp_raw
-                    break
+            stdin, stdout, stderr = client.exec_command("cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null")
+            temp_raw = stdout.read().decode('utf-8').strip()
+            if temp_raw and temp_raw.isdigit():
+                temp = f"{int(temp_raw)//1000}°C"
             metrics['temperature'] = temp
             
             # Внешний IP
-            stdin, stdout, stderr = client.exec_command("curl -s ifconfig.me 2>/dev/null || wget -qO- ifconfig.me 2>/dev/null")
+            stdin, stdout, stderr = client.exec_command("curl -s ifconfig.me 2>/dev/null")
             external_ip = stdout.read().decode('utf-8').strip()
             if external_ip and re.match(r'^\d+\.\d+\.\d+\.\d+$', external_ip):
                 metrics['external_ip'] = external_ip
             else:
-                stdin, stdout, stderr = client.exec_command("ip route get 1 | awk '{print $NF;exit}'")
-                external_ip = stdout.read().decode('utf-8').strip()
-                metrics['external_ip'] = external_ip if external_ip else "Unknown"
+                metrics['external_ip'] = "Unknown"
             
             # Статус VPN (OpenVPN)
-            stdin, stdout, stderr = client.exec_command("ps aux | grep openvpn | grep -v grep | wc -l")
+            stdin, stdout, stderr = client.exec_command("ps aux | grep 'openvpn.*amsterdam' | grep -v grep | wc -l")
             vpn_running = int(stdout.read().decode('utf-8').strip())
             metrics['vpn_status'] = 'active' if vpn_running > 0 else 'inactive'
             
-            # Количество WiFi клиентов
-            stdin, stdout, stderr = client.exec_command("iw dev wlan0 station dump 2>/dev/null | grep Station | wc -l || echo 0")
-            wifi_clients = stdout.read().decode('utf-8').strip()
-            metrics['wifi_clients'] = wifi_clients if wifi_clients else "0"
+            # Если VPN активен, получаем его IP
+            if vpn_running > 0:
+                stdin, stdout, stderr = client.exec_command("ip route | grep tun | awk '{print $3}' | head -1")
+                vpn_ip = stdout.read().decode('utf-8').strip()
+                metrics['vpn_ip'] = vpn_ip if vpn_ip else "Unknown"
             
             client.close()
             
@@ -182,19 +170,22 @@ class RouterMonitor:
             )
             
             # Проверяем статус
-            stdin, stdout, stderr = client.exec_command("ps aux | grep openvpn | grep -v grep | wc -l")
+            stdin, stdout, stderr = client.exec_command("ps aux | grep 'openvpn.*amsterdam' | grep -v grep | wc -l")
             is_running = int(stdout.read().decode('utf-8').strip()) > 0
             
             if is_running:
                 # Останавливаем VPN
                 client.exec_command("killall openvpn 2>/dev/null")
                 action = "stopped"
+                logger.info("VPN stopped")
             else:
-                # Запускаем VPN (путь к конфигу нужно уточнить)
-                client.exec_command("openvpn --config /etc/openvpn/amsterdam.ovpn --daemon 2>/dev/null")
+                # Запускаем VPN с правильным конфигом
+                client.exec_command("cd /etc/openvpn && openvpn --config amsterdam.ovpn --auth-user-pass amsterdam.auth --daemon")
                 action = "started"
+                logger.info("VPN started")
             
             client.close()
+            time.sleep(1)  # Даем время на запуск/остановку
             return {'status': 'success', 'action': action}
         except Exception as e:
             logger.error(f"VPN toggle error: {e}")
@@ -215,6 +206,15 @@ def toggle_vpn():
     result = monitor.toggle_vpn()
     return jsonify(result)
 
+@app.route('/api/vpn/status', methods=['GET'])
+def vpn_status():
+    """Отдельный эндпоинт для статуса VPN"""
+    metrics = monitor.get_metrics()
+    return jsonify({
+        'status': metrics.get('vpn_status', 'inactive'),
+        'ip': metrics.get('vpn_ip', 'N/A')
+    })
+
 @app.route('/api/health')
 def health():
     return jsonify({
@@ -223,7 +223,7 @@ def health():
     })
 
 if __name__ == '__main__':
-    logger.info("Starting Router Dashboard (Brutal Edition)...")
+    logger.info("Starting Router Dashboard (Cyberpunk Edition)...")
     if validate_config():
         logger.info(f"Router configured: {ROUTER_CONFIG['host']} as {ROUTER_CONFIG['user']}")
         logger.info("Update interval: 1 second")

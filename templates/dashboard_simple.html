@@ -3,36 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROUTER DASHBOARD // MIL-SPEC</title>
+    <title>CYBERPUNK ROUTER // NETRUNNER DASH</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            font-family: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
-            background: #0a0a0a;
+            font-family: 'Orbitron', 'Courier New', monospace;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
             min-height: 100vh;
             padding: 20px;
-            color: #00ff41;
+            color: #00ff9d;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Киберимпланты - геометрические узоры */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(0,255,157,0.03) 0px, rgba(0,255,157,0.03) 2px, transparent 2px, transparent 8px),
+                repeating-linear-gradient(135deg, rgba(255,0,255,0.02) 0px, rgba(255,0,255,0.02) 1px, transparent 1px, transparent 6px);
+            pointer-events: none;
+            z-index: 0;
         }
         
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
         
+        /* Neon тени */
         h1 {
-            color: #00ff41;
+            color: #00ff9d;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 2em;
-            font-weight: bold;
-            letter-spacing: 4px;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            font-weight: 900;
+            letter-spacing: 6px;
             text-transform: uppercase;
-            text-shadow: 0 0 10px #00ff41;
-            border-bottom: 2px solid #00ff41;
-            display: inline-block;
-            padding-bottom: 10px;
-            width: auto;
+            text-shadow: 
+                0 0 10px #00ff9d,
+                0 0 20px #00ff9d,
+                0 0 40px rgba(0,255,157,0.5);
+            animation: neonPulse 2s infinite;
+        }
+        
+        @keyframes neonPulse {
+            0%, 100% { opacity: 1; text-shadow: 0 0 10px #00ff9d, 0 0 20px #00ff9d; }
+            50% { opacity: 0.9; text-shadow: 0 0 5px #00ff9d, 0 0 15px #00ff9d; }
         }
         
         .header-container {
@@ -40,10 +71,19 @@
             margin-bottom: 30px;
         }
         
+        .subtitle {
+            font-size: 0.7em;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+            letter-spacing: 2px;
+        }
+        
+        /* Статус бар - как интерфейс киберимпланта */
         .status-bar {
-            background: #0f0f0f;
-            border: 1px solid #00ff41;
-            border-radius: 0px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #00ff9d;
+            box-shadow: 0 0 15px rgba(0,255,157,0.3);
             padding: 15px 20px;
             margin-bottom: 20px;
             display: flex;
@@ -51,8 +91,6 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            font-family: monospace;
-            box-shadow: 0 0 5px rgba(0,255,65,0.3);
         }
         
         .status {
@@ -62,21 +100,39 @@
         }
         
         .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 0px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
             animation: pulse 1s infinite;
+            box-shadow: 0 0 10px currentColor;
         }
         
-        .status-dot.online { background: #00ff41; box-shadow: 0 0 5px #00ff41; }
-        .status-dot.offline { background: #ff0000; box-shadow: 0 0 5px #ff0000; }
+        .status-dot.online { background: #00ff9d; color: #00ff9d; animation: none; }
+        .status-dot.online::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff9d;
+            animation: ping 1.5s infinite;
+        }
+        
+        @keyframes ping {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+        
+        .status-dot.offline { background: #ff0066; box-shadow: 0 0 10px #ff0066; }
+        
+        .status-dot.online { background: #00ff9d; box-shadow: 0 0 10px #00ff9d; }
         
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
         }
         
+        /* Карточки - как интерфейс нетраннера */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -85,42 +141,48 @@
         }
         
         .card {
-            background: #0f0f0f;
-            border: 1px solid #00ff41;
-            border-radius: 0px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0,255,157,0.3);
             padding: 20px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
         
         .card::before {
-            content: ">";
+            content: "";
             position: absolute;
-            top: 10px;
-            left: 10px;
-            color: #00ff41;
-            font-size: 12px;
-            opacity: 0.5;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,157,0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .card:hover::before {
+            left: 100%;
         }
         
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(0,255,65,0.2);
-            border-color: #00ff41;
+            border-color: #00ff9d;
+            box-shadow: 0 0 20px rgba(0,255,157,0.3);
+            transform: translateY(-3px);
         }
         
         .card h3 {
-            color: #00ff41;
+            color: #ff00ff;
             margin-bottom: 15px;
-            font-size: 1.2em;
+            font-size: 1.1em;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: bold;
-            border-left: 3px solid #00ff41;
+            letter-spacing: 3px;
+            border-left: 3px solid #ff00ff;
             padding-left: 12px;
+            text-shadow: 0 0 5px #ff00ff;
         }
         
+        /* Цифры как в киберпанке */
         .load-values {
             display: flex;
             justify-content: space-around;
@@ -128,76 +190,158 @@
         }
         
         .load-item { text-align: center; }
-        .load-label { font-size: 0.8em; color: #00ff41; opacity: 0.7; text-transform: uppercase; }
-        .load-number { font-size: 1.8em; font-weight: bold; color: #00ff41; font-family: monospace; }
+        .load-label { font-size: 0.7em; color: #00ff9d; opacity: 0.7; letter-spacing: 2px; }
+        .load-number { 
+            font-size: 2em; 
+            font-weight: 900; 
+            color: #00ff9d; 
+            text-shadow: 0 0 5px #00ff9d;
+            font-family: monospace;
+        }
         
         .progress-bar {
             margin-top: 10px;
-            background: #1a1a1a;
-            border: 1px solid #00ff41;
-            border-radius: 0px;
+            background: rgba(0,255,157,0.1);
+            border: 1px solid #00ff9d;
             overflow: hidden;
         }
         
         .progress-fill {
-            background: #00ff41;
+            background: linear-gradient(90deg, #00ff9d, #ff00ff);
             width: 0%;
             height: 20px;
             transition: width 0.3s;
+            box-shadow: 0 0 5px #00ff9d;
+        }
+        
+        /* Toggle switch для VPN (Cyberpunk style) */
+        .vpn-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,255,157,0.05);
+            border: 1px solid rgba(0,255,157,0.3);
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,0,102,0.3);
+            transition: 0.3s;
+            border: 1px solid #ff0066;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 3px;
+            background-color: #ff0066;
+            transition: 0.3s;
+            box-shadow: 0 0 5px #ff0066;
+        }
+        
+        input:checked + .slider {
+            background-color: rgba(0,255,157,0.3);
+            border-color: #00ff9d;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: #00ff9d;
+            box-shadow: 0 0 10px #00ff9d;
+        }
+        
+        .slider.round {
+            border-radius: 34px;
+        }
+        
+        .slider.round:before {
+            border-radius: 50%;
+        }
+        
+        .vpn-status-text {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .vpn-status-text.active {
+            color: #00ff9d;
+            text-shadow: 0 0 5px #00ff9d;
+        }
+        
+        .vpn-status-text.inactive {
+            color: #ff0066;
+            text-shadow: 0 0 5px #ff0066;
+        }
+        
+        .data-line {
+            margin: 8px 0;
+            font-size: 0.85em;
+        }
+        
+        .data-label {
+            color: #00ff9d;
+            opacity: 0.7;
+            display: inline-block;
+            width: 140px;
+            letter-spacing: 1px;
+        }
+        
+        .data-value {
+            color: #ff00ff;
+            font-weight: bold;
+            text-shadow: 0 0 3px #ff00ff;
         }
         
         .timestamp {
             text-align: center;
-            color: #00ff41;
             margin-top: 20px;
-            font-size: 0.8em;
-            font-family: monospace;
-            opacity: 0.7;
+            font-size: 0.7em;
+            opacity: 0.6;
+            letter-spacing: 1px;
         }
         
-        .refresh-btn, .vpn-btn {
-            background: transparent;
-            color: #00ff41;
-            border: 1px solid #00ff41;
+        .refresh-btn {
+            background: rgba(0,255,157,0.1);
+            color: #00ff9d;
+            border: 1px solid #00ff9d;
             padding: 8px 16px;
-            border-radius: 0px;
             cursor: pointer;
-            font-size: 12px;
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
-            font-family: monospace;
+            letter-spacing: 2px;
             transition: all 0.3s;
         }
         
-        .refresh-btn:hover, .vpn-btn:hover {
-            background: #00ff41;
-            color: #0a0a0a;
-            box-shadow: 0 0 10px #00ff41;
-        }
-        
-        .vpn-btn.active {
-            background: #00ff41;
-            color: #0a0a0a;
-            box-shadow: 0 0 10px #00ff41;
-        }
-        
-        @keyframes scan {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(100%); }
-        }
-        
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0,255,65,0.03) 50%);
-            background-size: 100% 4px;
-            animation: scan 8s linear infinite;
-            z-index: 9999;
+        .refresh-btn:hover {
+            background: #00ff9d;
+            color: #000;
+            box-shadow: 0 0 15px #00ff9d;
         }
         
         .blink {
@@ -209,22 +353,17 @@
             50% { opacity: 0; }
         }
         
-        .data-line {
-            font-family: monospace;
-            margin: 5px 0;
-            font-size: 0.9em;
+        /* Глитч эффект */
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-1px, 1px); }
+            40% { transform: translate(-1px, -1px); }
+            60% { transform: translate(1px, 1px); }
+            80% { transform: translate(1px, -1px); }
         }
         
-        .data-label {
-            color: #00ff41;
-            opacity: 0.7;
-            display: inline-block;
-            width: 140px;
-        }
-        
-        .data-value {
-            color: #00ff41;
-            font-weight: bold;
+        .glitch-text {
+            animation: glitch 0.2s infinite;
         }
         
         @media (max-width: 768px) {
@@ -236,24 +375,23 @@
 <body>
     <div class="container">
         <div class="header-container">
-            <h1>ROUTER DASHBOARD // v2.0</h1>
-            <div style="font-size: 0.7em; margin-top: 10px;">[ SYSTEM MONITORING TERMINAL ]</div>
+            <h1 class="glitch-text">>&gt; NETRUNNER DASH &lt;</h1>
+            <div class="subtitle">[ CYBERPUNK ROUTER INTERFACE v2.0 ]</div>
         </div>
         
         <div class="status-bar">
             <div class="status">
                 <div class="status-dot online" id="statusDot"></div>
-                <span id="statusText">ONLINE</span>
+                <span id="statusText">CONNECTED</span>
                 <span class="blink">_</span>
             </div>
-            <div>🏭 TARGET: SNR-CPE-ME2-Lite</div>
+            <div>🎯 TARGET: SNR-CPE-ME2-Lite</div>
             <div>⏱️ UPTIME: <span id="uptime">-</span></div>
-            <div>🌐 EXTERNAL IP: <span id="external_ip">-</span></div>
-            <button class="refresh-btn" onclick="loadMetrics()">[ REFRESH ]</button>
+            <div>🌐 EXT IP: <span id="external_ip">-</span></div>
+            <button class="refresh-btn" onclick="loadMetrics()">⟳ REFRESH</button>
         </div>
         
         <div class="metrics-grid">
-            <!-- CPU Load Average -->
             <div class="card">
                 <h3>CPU LOAD AVERAGE</h3>
                 <div class="load-values">
@@ -276,7 +414,6 @@
                 </div>
             </div>
             
-            <!-- Memory Usage -->
             <div class="card">
                 <h3>MEMORY USAGE</h3>
                 <div class="data-line">
@@ -304,16 +441,11 @@
                 </div>
             </div>
             
-            <!-- System Status -->
             <div class="card">
                 <h3>SYSTEM STATUS</h3>
                 <div class="data-line">
-                    <span class="data-label">CONNECTIONS (ARP):</span>
+                    <span class="data-label">ARP ENTRIES:</span>
                     <span class="data-value" id="connections">-</span>
-                </div>
-                <div class="data-line">
-                    <span class="data-label">WIFI CLIENTS:</span>
-                    <span class="data-value" id="wifi_clients">-</span>
                 </div>
                 <div class="data-line">
                     <span class="data-label">TEMP:</span>
@@ -325,18 +457,26 @@
                 </div>
             </div>
             
-            <!-- VPN Control -->
             <div class="card">
-                <h3>VPN CONTROL</h3>
+                <h3>VPN TUNNEL</h3>
+                <div class="data-line">
+                    <span class="data-label">SERVER:</span>
+                    <span class="data-value">amsterdam.amsterdam</span>
+                </div>
                 <div class="data-line">
                     <span class="data-label">STATUS:</span>
-                    <span class="data-value" id="vpn_status">-</span>
+                    <span class="data-value" id="vpn_status_text">INACTIVE</span>
                 </div>
-                <div class="data-line">
-                    <button class="vpn-btn" id="vpnBtn" onclick="toggleVPN()">[ TOGGLE VPN ]</button>
+                <div class="data-line" id="vpn_ip_line" style="display: none;">
+                    <span class="data-label">VPN IP:</span>
+                    <span class="data-value" id="vpn_ip">-</span>
                 </div>
-                <div class="data-line" style="margin-top: 10px; font-size: 0.7em; opacity: 0.5;">
-                    ⚡ OpenVPN amsterdam.amsterdam
+                <div class="vpn-toggle">
+                    <span class="vpn-status-text" id="vpnStatusLabel">OFFLINE</span>
+                    <label class="switch">
+                        <input type="checkbox" id="vpnToggle">
+                        <span class="slider round"></span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -348,6 +488,8 @@
     </div>
     
     <script>
+        let isToggling = false;
+        
         async function loadMetrics() {
             try {
                 const response = await fetch('/api/metrics');
@@ -367,14 +509,13 @@
                     document.getElementById('mem_bar').style.width = data.memory.percent + '%';
                     
                     const memBar = document.getElementById('mem_bar');
-                    if (data.memory.percent > 90) memBar.style.background = '#ff0000';
-                    else if (data.memory.percent > 75) memBar.style.background = '#ff6600';
-                    else memBar.style.background = '#00ff41';
+                    if (data.memory.percent > 90) memBar.style.background = '#ff0066';
+                    else if (data.memory.percent > 75) memBar.style.background = '#ff00ff';
+                    else memBar.style.background = 'linear-gradient(90deg, #00ff9d, #ff00ff)';
                 }
                 
                 if (data.uptime) document.getElementById('uptime').innerText = data.uptime;
                 if (data.connections) document.getElementById('connections').innerText = data.connections;
-                if (data.wifi_clients) document.getElementById('wifi_clients').innerText = data.wifi_clients;
                 if (data.temperature) document.getElementById('temperature').innerHTML = data.temperature;
                 if (data.external_ip) document.getElementById('external_ip').innerHTML = data.external_ip;
                 if (data.cpu_cores) document.getElementById('cpu_cores').innerText = data.cpu_cores;
@@ -383,50 +524,81 @@
                 
                 // VPN статус
                 if (data.vpn_status) {
-                    const vpnStatus = document.getElementById('vpn_status');
-                    const vpnBtn = document.getElementById('vpnBtn');
+                    const toggle = document.getElementById('vpnToggle');
+                    const statusSpan = document.getElementById('vpn_status_text');
+                    const statusLabel = document.getElementById('vpnStatusLabel');
+                    const vpnIpLine = document.getElementById('vpn_ip_line');
+                    const vpnIpSpan = document.getElementById('vpn_ip');
+                    
                     if (data.vpn_status === 'active') {
-                        vpnStatus.innerHTML = '🟢 ACTIVE';
-                        vpnBtn.classList.add('active');
+                        toggle.checked = true;
+                        statusSpan.innerHTML = '🟢 ACTIVE';
+                        statusSpan.className = 'vpn-status-text active';
+                        statusLabel.innerHTML = 'ONLINE';
+                        statusLabel.className = 'vpn-status-text active';
+                        if (data.vpn_ip) {
+                            vpnIpSpan.innerHTML = data.vpn_ip;
+                            vpnIpLine.style.display = 'block';
+                        }
                     } else {
-                        vpnStatus.innerHTML = '🔴 INACTIVE';
-                        vpnBtn.classList.remove('active');
+                        toggle.checked = false;
+                        statusSpan.innerHTML = '🔴 INACTIVE';
+                        statusSpan.className = 'vpn-status-text inactive';
+                        statusLabel.innerHTML = 'OFFLINE';
+                        statusLabel.className = 'vpn-status-text inactive';
+                        vpnIpLine.style.display = 'none';
                     }
                 }
                 
                 document.getElementById('statusDot').className = 'status-dot online';
-                document.getElementById('statusText').innerText = 'ONLINE';
+                document.getElementById('statusText').innerText = 'CONNECTED';
                 
             } catch (error) {
                 console.error('Error loading metrics:', error);
-                document.getElementById('timestamp').innerHTML = 'ERROR: CONNECTION LOST';
+                document.getElementById('timestamp').innerHTML = '⚠️ CONNECTION LOST ⚠️';
                 document.getElementById('statusDot').className = 'status-dot offline';
-                document.getElementById('statusText').innerText = 'OFFLINE';
+                document.getElementById('statusText').innerText = 'DISCONNECTED';
             }
         }
         
         async function toggleVPN() {
-            const btn = document.getElementById('vpnBtn');
-            btn.disabled = true;
-            btn.innerText = '[ PROCESSING... ]';
+            if (isToggling) return;
+            isToggling = true;
+            
+            const toggle = document.getElementById('vpnToggle');
+            const originalState = toggle.checked;
+            
+            // Оптимистичное обновление UI
+            toggle.disabled = true;
             
             try {
                 const response = await fetch('/api/toggle_vpn', { method: 'POST' });
                 const result = await response.json();
                 
                 if (result.status === 'success') {
-                    setTimeout(loadMetrics, 500);
+                    // Ждем обновления статуса
+                    setTimeout(() => {
+                        loadMetrics();
+                        setTimeout(loadMetrics, 1000);
+                    }, 500);
                 } else {
+                    // Возвращаем состояние если ошибка
+                    toggle.checked = originalState;
                     console.error('VPN toggle failed:', result.message);
                 }
             } catch (error) {
                 console.error('Error toggling VPN:', error);
+                toggle.checked = originalState;
             } finally {
-                btn.disabled = false;
-                btn.innerText = '[ TOGGLE VPN ]';
+                toggle.disabled = false;
+                isToggling = false;
             }
         }
         
+        // Навешиваем обработчик на тумблер
+        document.getElementById('vpnToggle').addEventListener('change', toggleVPN);
+        
+        // Загружаем данные и обновляем каждую секунду
         loadMetrics();
         setInterval(loadMetrics, 1000);
     </script>
