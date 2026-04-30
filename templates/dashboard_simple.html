@@ -17,13 +17,13 @@
             font-family: 'Orbitron', 'Courier New', monospace;
             background: radial-gradient(ellipse at center, #0a0a2a 0%, #000000 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 25px;
             color: #00ff9d;
             position: relative;
             overflow-x: hidden;
         }
         
-        /* Анимированный фон - движущиеся линии */
+        /* Анимированный фон */
         body::before {
             content: "";
             position: fixed;
@@ -44,7 +44,6 @@
             100% { transform: translate(50px, 50px); }
         }
         
-        /* Плавающие частицы */
         body::after {
             content: "";
             position: fixed;
@@ -73,10 +72,10 @@
         h1 {
             color: #00ff9d;
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 1.8em;
+            margin-bottom: 8px;
+            font-size: 2em;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
             text-transform: uppercase;
             text-shadow: 0 0 10px #00ff9d, 0 0 20px rgba(0,255,157,0.5);
         }
@@ -87,11 +86,10 @@
         }
         
         .subtitle {
-            font-size: 0.6em;
+            font-size: 0.7em;
             color: #ff00ff;
             text-shadow: 0 0 5px #ff00ff;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
+            letter-spacing: 3px;
         }
         
         /* Статус бар */
@@ -106,7 +104,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
-            font-size: 0.85em;
+            font-size: 0.9em;
         }
         
         .status {
@@ -125,7 +123,6 @@
         .status-dot.online { 
             background: #00ff9d;
             box-shadow: 0 0 10px #00ff9d;
-            animation: none;
         }
         
         .status-dot.online::after {
@@ -145,24 +142,18 @@
         
         .status-dot.offline { background: #ff0066; box-shadow: 0 0 10px #ff0066; }
         
-        .router-name {
-            font-size: 0.8em;
-            opacity: 0.8;
-            letter-spacing: 1px;
-        }
-        
         .current-time {
             font-family: monospace;
-            font-size: 0.9em;
+            font-size: 1.1em;
             color: #ff00ff;
             text-shadow: 0 0 5px #ff00ff;
         }
         
-        /* Карточки компактные */
+        /* Карточки - чуть крупнее */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             margin-bottom: 20px;
         }
         
@@ -170,9 +161,8 @@
             background: rgba(0,0,0,0.6);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(0,255,157,0.3);
-            padding: 15px;
+            padding: 18px;
             transition: all 0.3s ease;
-            position: relative;
         }
         
         .card:hover {
@@ -183,33 +173,35 @@
         .card h3 {
             color: #ff00ff;
             margin-bottom: 12px;
-            font-size: 0.85em;
+            font-size: 0.9em;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             border-left: 2px solid #ff00ff;
             padding-left: 10px;
         }
         
-        /* Компактные данные */
+        /* LOAD значения - крупнее */
         .load-values {
             display: flex;
-            justify-content: space-around;
-            margin: 10px 0;
+            justify-content: space-between;
+            margin: 12px 0;
+            gap: 10px;
         }
         
         .load-item {
             text-align: center;
+            flex: 1;
         }
         
         .load-label {
-            font-size: 0.6em;
+            font-size: 0.7em;
             color: #00ff9d;
             opacity: 0.7;
             letter-spacing: 1px;
         }
         
         .load-number {
-            font-size: 1.5em;
+            font-size: 1.6em;
             font-weight: 900;
             color: #00ff9d;
             text-shadow: 0 0 5px #00ff9d;
@@ -217,7 +209,7 @@
         }
         
         .progress-bar {
-            margin-top: 8px;
+            margin-top: 10px;
             background: rgba(0,255,157,0.1);
             border: 1px solid #00ff9d;
             overflow: hidden;
@@ -226,18 +218,18 @@
         .progress-fill {
             background: linear-gradient(90deg, #00ff9d, #ff00ff);
             width: 0%;
-            height: 15px;
+            height: 12px;
             transition: width 0.3s;
             box-shadow: 0 0 5px #00ff9d;
         }
         
-        /* Компактные строки данных */
+        /* Строки данных - крупнее */
         .data-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 6px 0;
-            font-size: 0.8em;
+            margin: 8px 0;
+            font-size: 0.85em;
         }
         
         .data-label {
@@ -251,6 +243,7 @@
             font-weight: bold;
             text-shadow: 0 0 3px #ff00ff;
             font-family: monospace;
+            font-size: 1em;
         }
         
         /* VPN тумблер */
@@ -258,16 +251,17 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 10px;
-            padding: 8px;
+            margin-top: 12px;
+            padding: 8px 10px;
             background: rgba(0,255,157,0.05);
             border: 1px solid rgba(0,255,157,0.3);
         }
         
         .vpn-status-text {
-            font-size: 0.75em;
+            font-size: 0.8em;
             text-transform: uppercase;
             letter-spacing: 2px;
+            font-weight: bold;
         }
         
         .vpn-status-text.active {
@@ -308,10 +302,10 @@
         .slider:before {
             position: absolute;
             content: "";
-            height: 20px;
-            width: 20px;
+            height: 18px;
+            width: 18px;
             left: 3px;
-            bottom: 2px;
+            bottom: 3px;
             background-color: #ff0066;
             transition: 0.3s;
             box-shadow: 0 0 5px #ff0066;
@@ -336,12 +330,15 @@
             border-radius: 50%;
         }
         
-        .timestamp {
-            text-align: right;
-            margin-top: 15px;
-            font-size: 0.7em;
-            opacity: 0.5;
-            letter-spacing: 1px;
+        /* Футер */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.8em;
+            opacity: 0.7;
+            letter-spacing: 3px;
+            border-top: 1px solid rgba(0,255,157,0.3);
+            padding-top: 15px;
         }
         
         .blink {
@@ -355,12 +352,7 @@
         
         @media (max-width: 768px) {
             .metrics-grid { grid-template-columns: 1fr; }
-            .load-number { font-size: 1.2em; }
-        }
-        
-        /* Убираем стандартные стили */
-        .hide {
-            display: none;
+            .load-number { font-size: 1.3em; }
         }
     </style>
 </head>
@@ -368,7 +360,7 @@
     <div class="container">
         <div class="header-container">
             <h1>&gt;&gt; NETRUNNER DASH &lt;&lt;</h1>
-            <div class="subtitle">[ CYBERPUNK INTERFACE v2.0 ]</div>
+            <div class="subtitle">[ CYBERPUNK INTERFACE ]</div>
         </div>
         
         <div class="status-bar">
@@ -377,16 +369,15 @@
                 <span id="statusText">ONLINE</span>
                 <span class="blink">_</span>
             </div>
-            <div class="router-name" id="routerName">SNR-CPE-ME2-Lite</div>
             <div class="current-time" id="currentTime">--:--:--</div>
             <div>UPTIME: <span id="uptime">-</span></div>
-            <div>🌐 EXT IP: <span id="external_ip">-</span></div>
+            <div>🌐 <span id="external_ip">-</span></div>
         </div>
         
         <div class="metrics-grid">
-            <!-- System Status - объединенный блок -->
+            <!-- SYSTEM STATUS -->
             <div class="card">
-                <h3>SYSTEM STATUS</h3>
+                <h3>SYSTEM</h3>
                 <div class="load-values">
                     <div class="load-item">
                         <div class="load-label">1m</div>
@@ -402,7 +393,7 @@
                     </div>
                 </div>
                 <div class="data-row">
-                    <span class="data-label">ARP ENTRIES:</span>
+                    <span class="data-label">ARP:</span>
                     <span class="data-value" id="connections">-</span>
                 </div>
                 <div class="data-row">
@@ -411,15 +402,15 @@
                 </div>
             </div>
             
-            <!-- Memory Usage - компактный -->
+            <!-- MEMORY USAGE -->
             <div class="card">
-                <h3>MEMORY USAGE</h3>
+                <h3>MEMORY</h3>
                 <div class="data-row">
-                    <span class="data-label">USED / FREE:</span>
-                    <span class="data-value"><span id="mem_used">-</span> / <span id="mem_free">-</span> MB</span>
+                    <span class="data-label">USED/FREE:</span>
+                    <span class="data-value"><span id="mem_used">-</span>/<span id="mem_free">-</span> MB</span>
                 </div>
                 <div class="data-row">
-                    <span class="data-label">USAGE:</span>
+                    <span class="data-label">LOAD:</span>
                     <span class="data-value"><span id="mem_percent">-</span>%</span>
                 </div>
                 <div class="progress-bar">
@@ -427,15 +418,15 @@
                 </div>
             </div>
             
-            <!-- VPN Control -->
+            <!-- VPN TUNNEL -->
             <div class="card">
-                <h3>VPN TUNNEL</h3>
+                <h3>VPN</h3>
                 <div class="data-row">
                     <span class="data-label">SERVER:</span>
                     <span class="data-value">amsterdam</span>
                 </div>
                 <div class="data-row" id="vpn_ip_line" style="display: none;">
-                    <span class="data-label">VPN IP:</span>
+                    <span class="data-label">IP:</span>
                     <span class="data-value" id="vpn_ip">-</span>
                 </div>
                 <div class="vpn-toggle">
@@ -448,13 +439,32 @@
             </div>
         </div>
         
-        <div class="timestamp">
-            <span id="timestamp">INITIALIZING...</span>
+        <div class="footer">
+            SNR-CPE-ME2-Lite
         </div>
     </div>
     
     <script>
         let isToggling = false;
+        
+        // Форматирование UPTIME в дни/часы/минуты
+        function formatUptime(uptimeStr) {
+            if (!uptimeStr || uptimeStr === '-') return '-';
+            
+            let days = 0, hours = 0, minutes = 0;
+            
+            const daysMatch = uptimeStr.match(/(\d+)\s*days?/);
+            const hoursMatch = uptimeStr.match(/(\d+)\s*hours?/);
+            const minutesMatch = uptimeStr.match(/(\d+)\s*min/);
+            
+            if (daysMatch) days = parseInt(daysMatch[1]);
+            if (hoursMatch) hours = parseInt(hoursMatch[1]);
+            if (minutesMatch) minutes = parseInt(minutesMatch[1]);
+            
+            if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+            if (hours > 0) return `${hours}h ${minutes}m`;
+            return `${minutes}m`;
+        }
         
         // Обновление текущего времени
         function updateCurrentTime() {
@@ -468,14 +478,12 @@
                 const response = await fetch('/api/metrics');
                 const data = await response.json();
                 
-                // Load Average
                 if (data.load_avg) {
                     document.getElementById('load1').innerText = data.load_avg.load1.toFixed(2);
                     document.getElementById('load5').innerText = data.load_avg.load5.toFixed(2);
                     document.getElementById('load15').innerText = data.load_avg.load15.toFixed(2);
                 }
                 
-                // Memory - исправляем отображение
                 if (data.memory && data.memory.total > 0) {
                     const used = data.memory.used;
                     const free = data.memory.free;
@@ -491,28 +499,19 @@
                     else if (percent > 75) memBar.style.background = '#ff00ff';
                     else memBar.style.background = 'linear-gradient(90deg, #00ff9d, #ff00ff)';
                 } else if (data.memory) {
-                    // Если данные некорректные, показываем заглушку
                     document.getElementById('mem_used').innerText = 'N/A';
                     document.getElementById('mem_free').innerText = 'N/A';
                     document.getElementById('mem_percent').innerText = 'N/A';
                 }
                 
-                // Uptime
-                if (data.uptime) document.getElementById('uptime').innerText = data.uptime;
+                if (data.uptime) {
+                    document.getElementById('uptime').innerText = formatUptime(data.uptime);
+                }
                 
-                // Connections
                 if (data.connections) document.getElementById('connections').innerText = data.connections;
-                
-                // External IP
                 if (data.external_ip) document.getElementById('external_ip').innerHTML = data.external_ip;
+                if (data.disk) document.getElementById('disk_info').innerHTML = `${data.disk.used}/${data.disk.total}(${data.disk.percent})`;
                 
-                // Disk info
-                if (data.disk) document.getElementById('disk_info').innerHTML = `${data.disk.used} / ${data.disk.total} (${data.disk.percent})`;
-                
-                // Last update timestamp
-                if (data.timestamp) document.getElementById('timestamp').innerHTML = `LAST SCAN: ${data.timestamp}`;
-                
-                // VPN статус
                 if (data.vpn_status) {
                     const toggle = document.getElementById('vpnToggle');
                     const statusLabel = document.getElementById('vpnStatusLabel');
@@ -521,7 +520,7 @@
                     
                     if (data.vpn_status === 'active') {
                         toggle.checked = true;
-                        statusLabel.innerHTML = '🟢 ACTIVE';
+                        statusLabel.innerHTML = 'ACTIVE';
                         statusLabel.className = 'vpn-status-text active';
                         if (data.vpn_ip) {
                             vpnIpSpan.innerHTML = data.vpn_ip;
@@ -529,7 +528,7 @@
                         }
                     } else {
                         toggle.checked = false;
-                        statusLabel.innerHTML = '🔴 INACTIVE';
+                        statusLabel.innerHTML = 'INACTIVE';
                         statusLabel.className = 'vpn-status-text inactive';
                         vpnIpLine.style.display = 'none';
                     }
@@ -540,7 +539,6 @@
                 
             } catch (error) {
                 console.error('Error loading metrics:', error);
-                document.getElementById('timestamp').innerHTML = '⚠️ CONNECTION ERROR ⚠️';
                 document.getElementById('statusDot').className = 'status-dot offline';
                 document.getElementById('statusText').innerText = 'OFFLINE';
             }
@@ -576,14 +574,11 @@
             }
         }
         
-        // Инициализация
         document.getElementById('vpnToggle').addEventListener('change', toggleVPN);
         
-        // Запускаем обновление времени
         updateCurrentTime();
         setInterval(updateCurrentTime, 1000);
         
-        // Загружаем метрики и обновляем каждую секунду
         loadMetrics();
         setInterval(loadMetrics, 1000);
     </script>
